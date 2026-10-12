@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Client–Server Demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f3f6fb; color: #172033; }
+    main { max-width: 760px; margin: 48px auto; padding: 24px; }
+    .card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 8px 24px #1b2b4b12; }
+    h1 { margin-top: 0; color: #174ea6; }
+    p { line-height: 1.55; }
+    .status { background: #eef5ff; border-left: 4px solid #3478d4; padding: 12px 14px; border-radius: 6px; }
+    label { display: block; font-weight: bold; margin: 22px 0 8px; }
+    input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; }
+    button { margin-top: 12px; padding: 11px 17px; border: 0; border-radius: 8px; background: #174ea6; color: white; font-size: 15px; cursor: pointer; }
+    button:hover { background: #103b80; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #101827; color: #d8e7ff; padding: 16px; border-radius: 8px; min-height: 70px; }
+    .small { font-size: 13px; color: #536176; }
+  </style>
+</head>
+<body>
+<main>
+  <section class="card">
+    <h1>Client–Server Communication Demo</h1>
+    <p>This webpage is the <strong>client</strong>. It sends HTTP requests to a Python server running on this computer (localhost).</p>
+    <div class="status" id="status">Checking server connection…</div>
+
+    <label for="message">Message to send to the server</label>
+    <input id="message" type="text" placeholder="Type a message, e.g. Hello server">
+    <button id="sendBtn">Send message</button>
+    <h2>Server response</h2>
+    <pre id="response">Your server response will appear here.</pre>
+    <p class="small">Local address: http://127.0.0.1:8000 · API endpoint: /api/message</p>
+  </section>
+</main>
+<script>
+  const statusBox = document.getElementById("status");
+  const responseBox = document.getElementById("response");
+
+  async function checkServer() {
+    try {
+      const response = await fetch("/api/status");
+      const data = await response.json();
+      statusBox.textContent = "Connection successful: " + data.message;
+    } catch (error) {
+      statusBox.textContent = "Cannot reach server. Make sure app.py is running.";
+    }
+  }
+
+  document.getElementById("sendBtn").addEventListener("click", async () => {
+    const message = document.getElementById("message").value.trim();
+    if (!message) {
+      responseBox.textContent = "Please type a message first.";
+      return;
+    }
+    responseBox.textContent = "Sending request…";
+    try {
+      const response = await fetch("/api/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
+      const data = await response.json();
+      responseBox.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+      responseBox.textContent = "Request failed. Check that the Python server is running.";
+    }
+  });
+
+  checkServer();
+</script>
+</body>
+</html>
